@@ -1,0 +1,77 @@
+# Setup Guide: Fail2Ban to Block SSH Attackers on Debian
+
+This guide explains how to install and configure Fail2Ban on a Debian system to block IP addresses that try to log in with incorrect SSH credentials multiple times.
+
+---
+
+## Step 1: Update Your System
+Before installing anything, update the package list:
+```bash
+sudo apt-get update
+
+ Step 2: Install Fail2Ban
+Install the Fail2Ban package using:
+
+######sudo apt-get install fail2ban
+
+ Step 3: Create or Edit Configuration File
+Open the jail configuration file:
+
+
+#######sudo nano /etc/fail2ban/jail.local
+Paste the following inside
+
+[sshd]
+enabled = true
+port = 22
+filter = sshd
+backend = systemd
+maxretry = 3
+bantime = 3600
+findtime = 600
+Explanation:
+
+enabled = true → Turns on protection for SSH.
+
+port = 22 → Monitors the SSH port.
+
+filter = sshd → Uses SSH logs for matching failed logins.
+
+backend = systemd → Reads logs using systemd journal.
+
+maxretry = 3 → Only 3 failed attempts allowed.
+
+bantime = 3600 → Blocks IP for 1 hour.
+
+findtime = 600 → Checks for 3 failures within 10 minutes.
+
+ Step 4: Restart Fail2Ban Service
+To apply the changes:
+sudo systemctl restart fail2ban
+Step 5: Check the Status
+To check if it's working and see banned IPs:
+
+sudo fail2ban-client status sshd
+You can also use this to list all Fail2Ban jails:
+
+
+sudo fail2ban-client status
+ Step 6: View Blocked IPs (Optional)
+To see which IPs are blocked using iptables:
+
+sudo iptables -L --line-numbers
+
+
+🎯 Result
+Now, if anyone tries to access your Debian system using SSH and fails more than 3 times within 10 minutes, Fail2Ban will automatically block that IP for 1 hour.
+
+📅 Practical Done On
+Date: 24 June 2025
+By: Vaibhav Nimase
+Module: Network Defense – CDAC PG-DITISS
+
+✅ Useful Tip
+If you ever want to unban an IP manually, use:
+
+sudo fail2ban-client set sshd unbanip <IP_ADDRESS>
+
